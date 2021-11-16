@@ -12,7 +12,7 @@ class Desc():
         self.ak = ak
         self.secret = secret
         self.region_id = region_id
-        self.cache = ExpiringDict(max_len=10000, max_age_seconds=10)
+        self.cache = ExpiringDict(max_len=10000, max_age_seconds=600)
         
     
     def get_desc(self, id):
