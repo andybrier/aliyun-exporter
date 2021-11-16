@@ -213,7 +213,6 @@ class AliyunCollector(object):
 
 # main
     def collect(self):
-        logging.info("start into collect")
         for project in self.metrics:
             if project in special_projects:
                 continue

@@ -33,7 +33,7 @@ class Desc():
                           self.cache[kv['InstanceId']] = kv['InstanceName']
             
 
-              return self.cache[id]
+              return " "  if self.cache[id] is None else  self.cache[id] 
             
                 
 
