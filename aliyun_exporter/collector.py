@@ -154,6 +154,7 @@ class AliyunCollector(object):
         return 'aliyun_{}_{}'.format(project, name)
 
     def metric_generator(self, project, metric):
+
         if 'name' not in metric:
             raise Exception('name must be set in metric item.')
         name = metric['name']
@@ -202,7 +203,11 @@ class AliyunCollector(object):
 
         gauge = GaugeMetricFamily(self.format_metric_name(project, name), '', labels=label_keys)
         for point in points:
-            gauge.add_metric([try_or_else(lambda: str(point[k]), '') for k in label_keys], point[measure])
+            try:
+               gauge.add_metric([try_or_else(lambda: str(point[k]), '') for k in label_keys], point[measure])
+            except:
+               logging.error("error happened when measure:{}, label_keys:{}, point: {}".format(measure, label_keys, point))
+
         yield gauge
         yield metric_up_gauge(self.format_metric_name(project, name), True)
 

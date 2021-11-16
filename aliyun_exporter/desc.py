@@ -4,7 +4,7 @@ from alibabacloud_tea_openapi import models as open_api_models
 from alibabacloud_r_kvstore20150101 import models as r_kvstore_20150101_models
 
 from expiringdict import ExpiringDict
-
+import logging
 
 class Desc():
     def __init__(self, ak, secret, region_id):
@@ -19,7 +19,8 @@ class Desc():
         if id in self.cache:
             return self.cache[id]
         else:
-            # redis
+              logging.info("start to query id info at {}".format(id))
+              # redis
               config = open_api_models.Config(self.ak, self.secret)        
               config.endpoint = 'r-kvstore.aliyuncs.com'
               client = R_kvstore20150101Client(config)
