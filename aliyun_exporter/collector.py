@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from prometheus_client import Summary
 from prometheus_client.core import GaugeMetricFamily, REGISTRY
 from aliyunsdkcore.client import AcsClient
+from aliyun_exporter.desc import Desc
 # from aliyunsdkcms.request.v20190101 import QueryMetricLastRequest
 from aliyunsdkcms.request.v20190101 import DescribeMetricLastRequest
 from aliyunsdkrds.request.v20140815 import DescribeDBInstancePerformanceRequest
@@ -69,8 +70,7 @@ class AliyunCollector(object):
         self.client = AcsClient(
             ak=config.credential['access_key_id'],
             secret=config.credential['access_key_secret'],
-            timeout=10,
-            connect_timeout=10,
+       
             max_retry_time=2
             # region_id=config.credential['region_id'] #在获取监控指标metrics时貌似不需要region
         )
@@ -78,11 +78,17 @@ class AliyunCollector(object):
         self.info_provider = InfoProvider(ak=config.credential['access_key_id'],
                                           secret=config.credential['access_key_secret'],
                                           region_id=config.credential['region_id'])
+
+        self.desc = Desc(config.credential['access_key_id'], 
+                         config.credential['access_key_secret'],
+                         config.credential['region_id'])
+
         self.special_collectors = dict()
         for k, v in special_projects.items():
             if k in self.metrics:
                 self.special_collectors[k] = v(self)
 
+# Query metrics data 
     def query_metric(self, project: str, metric: str, period: int):
         with self.rateLimiter:
             # req = QueryMetricLastRequest.QueryMetricLastRequest()
@@ -173,19 +179,43 @@ class AliyunCollector(object):
         if len(points) < 1:
             yield metric_up_gauge(self.format_metric_name(project, name), False)
             return
+
+
+            '''
+            points[
+            {
+                'timestamp': 1637056440000,
+                'userId': '1907690484245347',
+                'instanceId': 'r-bp10x4kim0yrb1j5vw',
+                'nodeId': 'r-bp10x4kim0yrb1j5vw-proxy-3',
+                'Maximum': 0.0,
+                'Average': 0.0
+            }
+            ]
+            '''
         label_keys = self.parse_label_keys(points[0])
+        # add label key : name
+        if(project == 'acs_kvstore'):
+            label_keys.append('name')
+            for p in points:
+                p['name'] = self.desc.get_desc(p['instanceId'])
+
         gauge = GaugeMetricFamily(self.format_metric_name(project, name), '', labels=label_keys)
         for point in points:
             gauge.add_metric([try_or_else(lambda: str(point[k]), '') for k in label_keys], point[measure])
         yield gauge
         yield metric_up_gauge(self.format_metric_name(project, name), True)
 
+# main
     def collect(self):
+        logging.info("start into collect")
         for project in self.metrics:
             if project in special_projects:
                 continue
             for metric in self.metrics[project]:
                 yield from self.metric_generator(project, metric)
+
+        ####### info as metrics  ####### 
         if self.info_metrics != None:
             for resource in self.info_metrics:
                 if self.config.do_info_region == None:
@@ -208,8 +238,6 @@ class AliyunCollector(object):
                             ak=self.config.credential['access_key_id'],
                             secret=self.config.credential['access_key_secret'],
                             region_id=a_region,
-                            timeout=10,
-                            connect_timeout=10,
                             max_retry_time=2,
                         )
                         t_metrice = self.info_provider.get_metrics(resource, client)
@@ -217,6 +245,8 @@ class AliyunCollector(object):
                             continue
                         else:
                             yield t_metrice
+        ####### info as metrics  ####### 
+
         for v in self.special_collectors.values():
             yield from v.collect()
 

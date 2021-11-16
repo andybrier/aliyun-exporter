@@ -1,9 +1,19 @@
 credential:
-  access_key_id: <YOUR_ACCESS_KEY_ID>
-  access_key_secret: <YOUR_ACCESS_KEY_SECRET>
-  region_id: <REGION_ID>
+  access_key_id: 
+  access_key_secret: 
+  region_id: cn-hangzhou
 
 metrics:
+  acs_kvstore:
+   - name: ShardingCpuUsage
+     period: 60
+   - name: ShardingMemoryUsage
+     period: 60
+   - name: ShardingProxyConnectionUsage
+     period: 60
+   - name: ShardingProxyCpuUsage
+     period: 60
+ 
   acs_cdn:
   - name: QPS
   acs_mongodb:
@@ -11,30 +21,35 @@ metrics:
     period: 300
   acs_dts:
     - name: SynchronizationLatency
-  acs_oss:
+  acs_oss_dashboard:
   #oss 需要配置measure，否则会报错average
-  - name: UserNetworkErrorCount
-    measure: UserNetworkErrorCount
+  #可用性
+  - name: Availability
     period: 60
-  - name: GetObjectE2eLatency
-    measure: GetObjectE2eLatency
+  #全部请求数
+  - name: TotalRequestCount
+    measure: GetObjectCount
+    period: 60
+ #有效请求数
+  - name: RequestValidRate
+    period: 60
+  #成功率
+  - name: SuccessRate
+    period: 60
+  #CDN
+  - name: CdnRecv
+    period: 60
+  - name: CdnSend
+    period: 60
+  #内网流入流出
+  - name: IntranetRecv
+    period: 60
+  - name: IntranetSend
+    period: 60
+  #公网流入流出
+  - name: InternetRecv
+    period: 60
+  - name: InternetSend
     period: 60
 
-info_metrics:
-  - ecs
-  - rds
-  - redis
-  - slb
-  - mongodb
-#  - elasticsearch
-#  - mq
-#  - polardb
-#  - oss
-#  - dts_migration
-#  - dts_subcription
-#  - dts_synchroniza
-
-
-do_info_region:
-  - "cn-zhangjiakou"
-  - "cn-beijing"
+ 

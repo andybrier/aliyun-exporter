@@ -9,6 +9,11 @@ from prometheus_client.metrics_core import GaugeMetricFamily
 import aliyunsdkecs.request.v20140526.DescribeInstancesRequest as DescribeECS
 import aliyunsdkrds.request.v20140815.DescribeDBInstancesRequest as DescribeRDS
 import aliyunsdkr_kvstore.request.v20150101.DescribeInstancesRequest as DescribeRedis
+
+from alibabacloud_r_kvstore20150101.client import Client as R_kvstore20150101Client
+from alibabacloud_tea_openapi import models as open_api_models
+from alibabacloud_r_kvstore20150101 import models as r_kvstore_20150101_models
+
 import aliyunsdkslb.request.v20140515.DescribeLoadBalancersRequest as DescribeSLB
 import aliyunsdkdds.request.v20151201.DescribeDBInstancesRequest as Mongodb
 import aliyunsdkpolardb.request.v20170801.DescribeDBClustersRequest as Polardb
