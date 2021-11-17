@@ -7,6 +7,7 @@ from alibabacloud_r_kvstore20150101 import models as r_kvstore_20150101_models
 from expiringdict import ExpiringDict
 import logging
 
+
 class Desc():
     def __init__(self, ak, secret, region_id):
         self.client = None
@@ -26,7 +27,8 @@ class Desc():
               if id not in self.cache:
                   self.cache[id] = " "
               return self.cache[id]
-    
+
+    # Query all redis instance infomation by paging.
     def query(self, page_num):
               config = open_api_models.Config(self.ak, self.secret)        
               config.endpoint = 'r-kvstore.aliyuncs.com'
@@ -36,7 +38,7 @@ class Desc():
               describe_instances_request.page_number = page_num
               rsp = client.describe_instances(describe_instances_request).to_map()
 
-             
+              # store all maps : instanceId -> instanceName 
               if rsp['body'] is not None:
                 if rsp['body']['Instances'] is not None:
                     if rsp['body']['Instances']['KVStoreInstance'] is not None:
